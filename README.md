@@ -1,7 +1,9 @@
-# Awesome Project Build with TypeORM
+# Para rodar o projeto siga os passos:
 
 Steps to run this project:
 
 1. Run `npm i` command
-2. Setup database settings inside `data-source.ts` file
-3. Run `npm start` command
+2. Run `docker-compose up -d` command
+3. Run `npm run dev` command
+
+   #### OBS: NECESSÁRIO DOCKER E NODEJS INSTALADO !
