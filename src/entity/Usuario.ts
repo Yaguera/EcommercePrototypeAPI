@@ -4,7 +4,9 @@
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
   } from "typeorm";
+import { Pedido } from "./Pedido";
   
   @Entity({ name: "users" })
 
@@ -23,6 +25,9 @@
   
     @Column({ default: "user" })
     role: string;
+
+    @OneToMany(() => Pedido, (pedido) => pedido.usuario) // Relacionamento inverso
+    pedidos: Pedido[];
   
     @CreateDateColumn()
     createdAt: Date;

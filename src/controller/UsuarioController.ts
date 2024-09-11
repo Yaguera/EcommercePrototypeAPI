@@ -7,8 +7,6 @@ import * as cache from "memory-cache";
 
 export class UsuarioController {
 
-    private userRepository = AppDataSource.getRepository(Usuario)
-
     static async signup(req: Request, res: Response) {
         const { name, email, password, role } = req.body;
         const encryptedPassword = await encrypt.encryptpass(password);

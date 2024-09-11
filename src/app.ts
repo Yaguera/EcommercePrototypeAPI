@@ -4,6 +4,7 @@ import * as logger from 'morgan'
 import path = require('path');
 import { conectarServidorNoBd } from './config/db';
 import { userRouter } from './routes/usuario'
+import { pedidoRouter } from './routes/pedidos';
 
 export const app = express()
 
@@ -20,7 +21,9 @@ conectarServidorNoBd()
 
 // configurar rotas
 
-app.use('/', userRouter);
+app.use('/user', userRouter);
+app.use('/pedidos',pedidoRouter)
+
 app.get('/favicon.ico', (req, res) => res.status(204));
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "../index.html"));

@@ -3,7 +3,7 @@ import { AppDataSource } from "../data-source";
 
 export class ProdutoController {
     
-    private userRepository = AppDataSource.getRepository(Produto)
+    private produtosRepository = AppDataSource.getRepository(Produto)
     // Método para salvar um novo produto
     async salvar(produto: Produto) {
         const produtoRepo = AppDataSource.manager.save(Produto);
@@ -12,6 +12,6 @@ export class ProdutoController {
 
     // Método para listar todos os produtos
     async listarTodos() {
-        return await this.userRepository.find();
+        return await this.produtosRepository.find();
     }
 }

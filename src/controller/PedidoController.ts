@@ -3,26 +3,22 @@ import { AppDataSource } from "../data-source";
 import { Pedido } from "../entity/Pedido";
 import { Usuario } from "../entity/Usuario";
 import { Produto } from "../entity/Produto";
+import { In } from "typeorm";
 
 export class PedidoController {
-
-    private pedidoRepository = AppDataSource.getRepository(Pedido);
-
     // Método para criar um novo pedido
     static async criarPedido(req: Request, res: Response) {
         try {
             const { usuarioId, produtos } = req.body;
 
             // Validação dos parâmetros de entrada
-            if (!usuarioId || !produtos || produtos.length === 0) {
-                return res.status(400).json({ message: "Usuário e produtos são obrigatórios" });
+            if (!usuarioId || !Array.isArray(produtos) || produtos.length === 0) {
+                return res.status(400).json({ message: "Usuário e produtos são obrigatórios e devem ser válidos" });
             }
 
             // Verifica se o usuário existe
             const usuarioRepository = AppDataSource.getRepository(Usuario);
-            const usuario = await usuarioRepository.findOne({
-                where: { id: usuarioId }
-            });
+            const usuario = await usuarioRepository.findOne({ where: { id: usuarioId } });
 
             if (!usuario) {
                 return res.status(404).json({ message: "Usuário não encontrado" });
@@ -35,7 +31,7 @@ export class PedidoController {
             // Associa os produtos ao pedido
             const produtoRepository = AppDataSource.getRepository(Produto);
             const listaProdutos = await produtoRepository.findBy({
-                id: In(produtos) // Corrige o uso de findByIds
+                id: In(produtos)
             });
 
             if (listaProdutos.length === 0) {
@@ -45,11 +41,13 @@ export class PedidoController {
             pedido.produtos = listaProdutos;
 
             // Salva o pedido
-            await this.pedidoRepository.save(pedido);
+            const pedidoRepository = AppDataSource.getRepository(Pedido);
+            await pedidoRepository.save(pedido);
             return res.status(201).json({ message: "Pedido criado com sucesso", pedido });
 
         } catch (error) {
-            return res.status(500).json({ message: "Erro ao criar pedido", error: error.message });
+            console.error(error);
+            return res.status(500).json({ message: "Erro ao criar pedido CHEGOU AQUI" });
         }
     }
 
@@ -57,11 +55,12 @@ export class PedidoController {
     static async listarPedidos(req: Request, res: Response) {
         try {
             const pedidos = await AppDataSource.getRepository(Pedido).find({
-                relations: ["usuario", "produtos"] // Carrega as relações com usuário e produtos
+                relations: ["usuario", "produtos"]
             });
             return res.status(200).json({ pedidos });
         } catch (error) {
-            return res.status(500).json({ message: "Erro ao listar pedidos", error: error.message });
+            console.error(error);
+            return res.status(500).json({ message: "Erro ao listar pedidos" });
         }
     }
 
@@ -73,7 +72,7 @@ export class PedidoController {
 
             const pedidoRepository = AppDataSource.getRepository(Pedido);
             const pedido = await pedidoRepository.findOne({
-                where: { id },
+                where: { id:Number(id) },
                 relations: ["produtos"]
             });
 
@@ -84,9 +83,7 @@ export class PedidoController {
             // Atualiza o usuário associado ao pedido, se informado
             if (usuarioId) {
                 const usuarioRepository = AppDataSource.getRepository(Usuario);
-                const usuario = await usuarioRepository.findOne({
-                    where: { id: usuarioId }
-                });
+                const usuario = await usuarioRepository.findOne({ where: { id: usuarioId } });
 
                 if (!usuario) {
                     return res.status(404).json({ message: "Usuário não encontrado" });
@@ -114,7 +111,8 @@ export class PedidoController {
             return res.status(200).json({ message: "Pedido atualizado com sucesso", pedido });
 
         } catch (error) {
-            return res.status(500).json({ message: "Erro ao atualizar pedido", error: error.message });
+            console.error(error);
+            return res.status(500).json({ message: "Erro ao atualizar pedido" });
         }
     }
 
@@ -123,9 +121,7 @@ export class PedidoController {
         try {
             const { id } = req.params;
             const pedidoRepository = AppDataSource.getRepository(Pedido);
-            const pedido = await pedidoRepository.findOne({
-                where: { id }
-            });
+            const pedido = await pedidoRepository.findOne({ where: { id:Number(id) } });
 
             if (!pedido) {
                 return res.status(404).json({ message: "Pedido não encontrado" });
@@ -135,7 +131,8 @@ export class PedidoController {
             await pedidoRepository.remove(pedido);
             return res.status(200).json({ message: "Pedido removido com sucesso" });
         } catch (error) {
-            return res.status(500).json({ message: "Erro ao remover pedido", error: error.message });
+            console.error(error);
+            return res.status(500).json({ message: "Erro ao remover pedido" });
         }
     }
 }
