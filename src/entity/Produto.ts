@@ -1,23 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Categoria } from "./Categoria"; // Assumindo que você tenha uma entidade de Categoria
 
 @Entity()
 export class Produto {
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
 
-    constructor(nome: string, quantidade: number, descricao: string){
-        this.nome = nome;
-        this.quantidade = quantidade;
-        this.descricao = descricao;
-    }
-
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
+    @Column({ nullable: false })
     nome: string;
 
-    @Column()
+    @Column({ type: "int", nullable: false })
     quantidade: number;
 
-    @Column()
-    descricao: string;
+    @ManyToOne(() => Categoria, categoria => categoria.produtos, { eager: true, nullable: false })
+    categoria: Categoria;
+
+    constructor(nome: string, quantidade: number, categoria: Categoria) {
+        this.nome = nome;
+        this.quantidade = quantidade;
+        this.categoria = categoria;
+    }
+
 }
+
+
