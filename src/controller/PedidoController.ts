@@ -4,18 +4,18 @@ import { Pedido } from "../entity/Pedido";
 import { Usuario } from "../entity/Usuario";
 import { Produto } from "../entity/Produto";
 import { In } from "typeorm";
+import { createMessageChannel } from "../messages/messageChannel";
 
 export class PedidoController {
     // Método para criar um novo pedido
     static async criarPedido(req: Request, res: Response) {
         try {
-            const { usuarioId, produtos } = req.body;
+            const { usuarioId, produtos, quantidadePorProduto } = req.body;
 
             // Validação dos parâmetros de entrada
-            if (!usuarioId || !Array.isArray(produtos) || produtos.length === 0) {
-                return res.status(400).json({ message: "Usuário e produtos são obrigatórios e devem ser válidos" });
+            if (!usuarioId || !Array.isArray(produtos) || produtos.length === 0 || !quantidadePorProduto) {
+                return res.status(400).json({ message: "Usuário, produtos e quantidades são obrigatórios" });
             }
-
             // Verifica se o usuário existe
             const usuarioRepository = AppDataSource.getRepository(Usuario);
             const usuario = await usuarioRepository.findOne({ where: { id: usuarioId } });
@@ -23,10 +23,6 @@ export class PedidoController {
             if (!usuario) {
                 return res.status(404).json({ message: "Usuário não encontrado" });
             }
-
-            // Cria o novo pedido
-            const pedido = new Pedido();
-            pedido.usuario = usuario;
 
             // Associa os produtos ao pedido
             const produtoRepository = AppDataSource.getRepository(Produto);
@@ -37,17 +33,42 @@ export class PedidoController {
             if (listaProdutos.length === 0) {
                 return res.status(404).json({ message: "Nenhum produto encontrado" });
             }
-
+            
+            // Cria o novo pedido
+            const pedido = new Pedido();
+            pedido.usuario = usuario;
             pedido.produtos = listaProdutos;
+            pedido.quantidadePorProduto = quantidadePorProduto;
+            pedido.status = "pendente";
 
             // Salva o pedido
             const pedidoRepository = AppDataSource.getRepository(Pedido);
             await pedidoRepository.save(pedido);
-            return res.status(201).json({ message: "Pedido criado com sucesso", pedido });
+            
+            // Envia a mensagem para a fila após o pedido ser criado
+            const channel = await createMessageChannel();
+            if (channel) {
+                const message = {
+                    pedidoId: pedido.id,
+                    usuarioId: usuario.id,
+                    produtos: produtos,
+                    quantidadePorProduto: quantidadePorProduto
+                };
+
+                // Envia a mensagem para a fila
+                const queueName = process.env.QUEUE_NAME;
+                channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
+                persistent: true,
+                });
+
+                console.log(`Mensagem enviada para a fila ${queueName}:`, message);
+            }
+
+            return res.status(201).json({ message: "Pedido criado e será processado", pedido });
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ message: "Erro ao criar pedido CHEGOU AQUI" });
+            return res.status(500).json({ message: "Erro ao criar pedido" });
         }
     }
 
@@ -72,7 +93,7 @@ export class PedidoController {
 
             const pedidoRepository = AppDataSource.getRepository(Pedido);
             const pedido = await pedidoRepository.findOne({
-                where: { id:Number(id) },
+                where: { id },
                 relations: ["produtos"]
             });
 
@@ -121,7 +142,7 @@ export class PedidoController {
         try {
             const { id } = req.params;
             const pedidoRepository = AppDataSource.getRepository(Pedido);
-            const pedido = await pedidoRepository.findOne({ where: { id:Number(id) } });
+            const pedido = await pedidoRepository.findOne({ where: { id } });
 
             if (!pedido) {
                 return res.status(404).json({ message: "Pedido não encontrado" });

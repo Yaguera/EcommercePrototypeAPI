@@ -29,6 +29,7 @@ export class ProdutoController {
       const produtoRepository = AppDataSource.getRepository(Produto);
       await produtoRepository.save(produto);
 
+      
       return res.status(201).json({ message: "Produto criado com sucesso", produto });
 
     } catch (error) {
