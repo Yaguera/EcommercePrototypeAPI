@@ -1,7 +1,7 @@
 <br> <h2>🛠️ Como rodar o projeto</h2>
 Clone o repositório: <code>git clone https://github.com/Yaguera/EcommercePrototypeAPI.git</code><br>
 
-Entre no diretório do projeto: <code>cd API-Gestao-Pedidos</code>
+Entre no diretório do projeto: <code>cd EcommercePrototypeAPI</code>
 
 1. Run `npm i` command
 3. Run `docker-compose up -d` command
