@@ -12,13 +12,17 @@ export class Produto {
     @Column({ type: "int", nullable: false })
     quantidade: number;
 
+    @Column({ nullable: false})
+    imageUrl: string;
+
     @ManyToOne(() => Categoria, categoria => categoria.produtos, { eager: true, nullable: false })
     categoria: Categoria;
 
-    constructor(nome: string, quantidade: number, categoria: Categoria) {
+    constructor(nome: string, quantidade: number, imageUrl: string , categoria: Categoria) {
         this.nome = nome;
         this.quantidade = quantidade;
         this.categoria = categoria;
+        this.imageUrl = imageUrl;
     }
 
 }

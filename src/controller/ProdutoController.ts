@@ -7,10 +7,10 @@ export class ProdutoController {
   // Método para criar um novo produto
   static async criarProduto(req: Request, res: Response) {
     try {
-      const { nome, quantidade, categoriaId } = req.body;
+      const { nome, quantidade, imageUrl, categoriaId } = req.body;
 
       // Validação dos parâmetros de entrada
-      if (!nome || quantidade === undefined || !categoriaId) {
+      if (!nome || quantidade === undefined || !categoriaId || !imageUrl) {
         return res.status(400).json({ message: "Nome, quantidade e categoria são obrigatórios" });
       }
 
@@ -23,7 +23,7 @@ export class ProdutoController {
       }
 
       // Cria o novo produto
-      const produto = new Produto(nome, quantidade, categoria);
+      const produto = new Produto(nome, quantidade, imageUrl, categoria);
 
       // Salva o produto
       const produtoRepository = AppDataSource.getRepository(Produto);
@@ -55,7 +55,7 @@ export class ProdutoController {
   static async atualizarProduto(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { nome, quantidade, categoriaId } = req.body;
+      const { nome, quantidade, imageUrl, categoriaId } = req.body;
 
       const produtoRepository = AppDataSource.getRepository(Produto);
       const produto = await produtoRepository.findOne({ where: { id} });
@@ -67,6 +67,7 @@ export class ProdutoController {
       // Atualiza o nome e a quantidade do produto
       if (nome) produto.nome = nome;
       if (quantidade !== undefined) produto.quantidade = quantidade;
+      if (imageUrl) produto.imageUrl = imageUrl;
 
       // Atualiza a categoria do produto, se informada
       if (categoriaId) {
