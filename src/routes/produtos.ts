@@ -14,10 +14,7 @@ Router.post(
 
 // Rota para listar todos os produtos
 Router.get(
-  "/all",
-  authentification,
-  authorization(["user", "admin"]),
-  ProdutoController.listarProdutos
+  "/all",ProdutoController.listarProdutos
 );
 
 // Rota para atualizar um produto
