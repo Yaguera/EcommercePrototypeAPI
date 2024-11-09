@@ -7,7 +7,7 @@ export class ProdutoController {
   // Método para criar um novo produto
   static async criarProduto(req: Request, res: Response) {
     try {
-      const { nome, quantidade, imageUrl, categoriaId } = req.body;
+      const { nome, quantidade, imageUrl, categoriaId, price } = req.body;
 
       // Validação dos parâmetros de entrada
       if (!nome || quantidade === undefined || !categoriaId || !imageUrl) {
@@ -23,7 +23,7 @@ export class ProdutoController {
       }
 
       // Cria o novo produto
-      const produto = new Produto(nome, quantidade, imageUrl, categoria);
+      const produto = new Produto(nome, quantidade, price, imageUrl, categoria);
 
       // Salva o produto
       const produtoRepository = AppDataSource.getRepository(Produto);
@@ -55,7 +55,7 @@ export class ProdutoController {
   static async atualizarProduto(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { nome, quantidade, imageUrl, categoriaId } = req.body;
+      const { nome, quantidade, imageUrl, categoriaId, price } = req.body;
 
       const produtoRepository = AppDataSource.getRepository(Produto);
       const produto = await produtoRepository.findOne({ where: { id} });
@@ -68,6 +68,7 @@ export class ProdutoController {
       if (nome) produto.nome = nome;
       if (quantidade !== undefined) produto.quantidade = quantidade;
       if (imageUrl) produto.imageUrl = imageUrl;
+      if (price) produto.price = price;
 
       // Atualiza a categoria do produto, se informada
       if (categoriaId) {
